@@ -1,121 +1,129 @@
-# AIrab - Local Research Assistant 
+# AIrab – Local Research Assistant
 
+Privacy-first local RAG desktop assistant for PDF and text document analysis using PyQt6 and Qwen2.5.
 
-**White or brown-themed PyQt6 desktop app with local Qwen2.5 RAG for Research.**
+## Overview
 
-Upload PDFs → instant intelligent analysis across all files.
+AIrab is a desktop research assistant that enables local document analysis with retrieval-augmented generation (RAG).  
+Users can upload PDF or text files, ask questions across multiple documents, and receive answers from a locally hosted language model without sending data to external cloud services.
 
-## Features
+The project demonstrates practical LLM integration, local inference, desktop UI engineering, and privacy-oriented application design.
 
-- **Local AI** - Qwen2.5-0.5B (64 tokens/sec CPU inference)
-- **Multi-PDF RAG** - Analyzes lectures, papers, ROS docs simultaneously
-- **Times New Roman theme** - Clean UI
-- **Chat history** - Dummy Password-encrypted persistence
-- **File upload** - PDF/TXT (max 3/chat)
-- **Zero cloud** - Fully offline after model download
+## Key Features
 
+- Local inference using Qwen2.5 in GGUF format.
+- Multi-document analysis across PDF and text files.
+- Retrieval-augmented question answering.
+- PyQt6 desktop interface.
+- Encrypted local chat history.
+- Offline workflow after initial model download.
+- Optional speech-to-text support with Vosk.
 
-## Quickstart
+## Why This Project Matters
 
-### **Prerequisites**
+Many AI assistants depend on cloud APIs, which can be limiting for private documents, offline use, or cost-sensitive workflows.  
+AIrab explores a local-first alternative by combining a desktop application with a locally hosted LLM and lightweight document retrieval.
+
+## Architecture
+
+### UI Layer
+- PyQt6 desktop application for chat, file upload, and interaction.
+
+### LLM Layer
+- `llama-cpp-python` server hosting Qwen2.5 locally.
+- OpenAI-compatible client for application integration.
+
+### Retrieval Layer
+- Extracts text from uploaded PDF and text files.
+- Builds lightweight context from document content for question answering.
+
+### Storage / Security
+- Chat history stored locally.
+- Password-encrypted persistence.
+- No cloud API dependency during normal use.
+
+## Tech Stack
+
+- **Language:** Python
+- **UI:** PyQt6
+- **LLM runtime:** llama.cpp / `llama-cpp-python`
+- **Model:** Qwen2.5-0.5B-Instruct-GGUF
+- **Document parsing:** PyMuPDF
+- **Security:** cryptography, keyring
+- **Speech-to-text:** Vosk
+
+## Project Structure
+
+```text
+src/
+├── main_window.py     # PyQt6 desktop UI
+├── llm_client.py      # OpenAI-compatible local client
+├── speech.py          # Optional Vosk speech-to-text
+└── utils.py           # Encryption and local storage helpers
+
+requirements.txt
+README.md
+```
+
+## Setup
+
+### Prerequisites
 - Python 3.12+
-- ~400MB disk space (model)
+- Approximately 400 MB disk space for the model
 
-### **1. Clone & Install**
+### 1. Clone the repository
 ```bash
-git clone https://github.com/ali76-AFK/airab.git
-cd airab
+git clone https://github.com/ali76-AFK/Local-Research-Assistant.git
+cd Local-Research-Assistant
 python -m venv venv
-source venv/bin/activate 
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### **2. Download Model** (~400MB)
+### 2. Download the model
 ```bash
 pip install huggingface-hub
-huggingface-cli download Qwen/Qwen2.5-0.5B-Instruct-GGUF Qwen2.5-0.5B-Instruct-Q4_K_M.gguf --local-dir models
+huggingface-cli download Qwen/Qwen2.5-0.5B-Instruct-GGUF \
+  Qwen2.5-0.5B-Instruct-Q4_K_M.gguf \
+  --local-dir models
 ```
 
-### **3. Two-Terminal Setup**
-
-**Terminal 1** (AI Server - keep running):
+### 3. Start the local LLM server
 ```bash
 python -m llama_cpp.server \
   --model models/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf \
-  --host 0.0.0.0 --port 8080 \
-  --n_ctx 2048 --n_threads 4
+  --host 0.0.0.0 \
+  --port 8080 \
+  --n_ctx 2048 \
+  --n_threads 4
 ```
 
-**Terminal 2** (GUI):
+### 4. Launch the GUI
 ```bash
 python airab.py
 ```
 
-
-## Project Structure
-
-```
-airab/
-├── src/
-│   ├── main_window.py     # PyQt6 brown GUI
-│   ├── llm_client.py      # OpenAI-compatible Qwen2.5 client
-│   ├── speech.py          # Vosk STT (disabled by default)
-│   └── utils.py           # Password encryption + storage
-├── models/                # Qwen2.5-0.5B GGUF model
-├── AIrab_data/            # Encrypted chat history (gitignored)
-└── requirements.txt
-```
-
-## Dependencies
-
-| Library | Purpose | Version |
-|---------|---------|---------|
-| PyQt6 | Beautiful brown GUI | Latest |
-| llama-cpp-python | CPU inference server | Latest |
-| openai | OpenAI-compatible client | 1.0+ |
-| cryptography | Password encryption | Latest |
-| keyring | Secure credential storage | Latest |
-| PyMuPDF | PDF text extraction | Latest |
-| vosk | Speech-to-text | small-en-us |
-
-```bash
-pip install PyQt6 llama-cpp-python openai cryptography keyring PyMuPDF vosk
-```
-
-## Customization
-
-**Theme** (brown Times New Roman): `src/main_window.py` line 350+
-**LLM Model**: Replace `models/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf`
-**Context**: `--n_ctx 4096` for longer chats
-
 ## Performance
 
-- **Inference**: 60-65 tokens/sec (CPU)
-- **PDF Processing**: First 2 pages/file (~1KB context)
-- **Max Files**: 3/chat (4000 char context limit)
-- **RAM**: ~1.5GB (model + GUI)
-
+- Local CPU inference at roughly 60 to 65 tokens per second.
+- Supports multi-document analysis across up to 3 uploaded files per chat.
+- Designed for lightweight local usage on a standard development machine.
 
 ## Security
 
-- **Password-encrypted** chat history
-- **Local-only** inference (localhost:8080)
-- **No cloud APIs**
-- **Git-ignored** data directory
+- Password-encrypted local chat history.
+- Local-only inference over `localhost`.
+- No cloud API dependency for document analysis after setup.
+- Data directory excluded from Git tracking.
 
-## Contributing
+## Future Improvements
 
-1. Fork → clone → create feature branch
-2. `pip install -r requirements.txt`
-3. Test with your 2-terminal setup
-4. PR to `main`
+- Better retrieval chunking and ranking.
+- More robust multi-document context handling.
+- Richer citation and source-tracing support.
+- Improved document preview and session management.
+- Packaging for easier desktop distribution.
 
 ## License
 
-MIT - Free for academic/commercial use.
-
-**Made possible by**: PyQt6, llama.cpp, Qwen2.5, vosk-api
-
-***
-
-⭐ **Star if useful for your research!**
+MIT License.
