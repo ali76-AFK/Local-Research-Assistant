@@ -2,6 +2,11 @@
 
 Privacy-first local RAG desktop assistant for PDF and text document analysis using PyQt6 and Qwen2.5.
 
+<p align="center">
+  <img src="./project-8.png" alt="" width="900">
+</p>
+
+
 ## Overview
 
 AIrab is a desktop research assistant that enables local document analysis with retrieval-augmented generation (RAG).  
