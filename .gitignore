@@ -30,3 +30,5 @@ logs/
 .idea/
 *.iml
 .vscode/
+models/
+vosk-model/
